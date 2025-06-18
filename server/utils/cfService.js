@@ -13,35 +13,39 @@ const getUserSubmissions = async (handle) => {
   return res.data.result;
 };
 
+const getUserInfo = async (handle) => {
+  const url = `https://codeforces.com/api/user.info?handles=${handle}`;
+  const res = await axios.get(url);
+  return res.data.result[0];
+};
+
 export const fetchCfData = async (handle) => {
   try {
-    const [ratingData, submissions] = await Promise.all([
+    const [ratingData, submissions, userInfo] = await Promise.all([
       getUserRating(handle),
       getUserSubmissions(handle),
+      getUserInfo(handle),
     ]);
 
-    let curRating = 0;
-    let maxRating = 0;
-    let contestHistory = [];
+    // Ratings
+    const curRating = userInfo.rating ?? 0;
+    const maxRating = userInfo.maxRating ?? 0;
 
-    if (ratingData.length > 0) {
-      curRating = ratingData.at(-1).newRating;
-      maxRating = Math.max(...ratingData.map(r => r.newRating));
+    // Contest history
+    const contestHistory = ratingData.map((c) => ({
+      contestId: c.contestId,
+      contestName: c.contestName,
+      rank: c.rank,
+      oldRating: c.oldRating,
+      newRating: c.newRating,
+      ratingUpdateTimeSeconds: c.ratingUpdateTimeSeconds,
+      unsolvedCount: 0,
+    }));
 
-      contestHistory = ratingData.map(c => ({
-        contestId: c.contestId,
-        contestName: c.contestName,
-        rank: c.rank,
-        oldRating: c.oldRating,
-        newRating: c.newRating,
-        ratingUpdateTimeSeconds: c.ratingUpdateTimeSeconds,
-        unsolvedCount: 0,
-      }));
-    }
+    // Submissions - only accepted ones
+    const accepted = submissions.filter((s) => s.verdict === 'OK');
 
-    const accepted = submissions.filter(s => s.verdict === "OK");
-
-    const submissionStats = accepted.map(sub => ({
+    const submissionStats = accepted.map((sub) => ({
       problemId: `${sub.problem.contestId}-${sub.problem.index}`,
       problemName: sub.problem.name,
       rating: sub.problem.rating || 0,
@@ -53,6 +57,14 @@ export const fetchCfData = async (handle) => {
 
     const problemSummary = computeProblemSummary(submissionStats);
 
+    // Extracted profile data
+    const profile = {
+      avatar: userInfo.avatar || 'https://userpic.codeforces.org/no-avatar.jpg',
+      rank: userInfo.rank || '',
+      maxRank: userInfo.maxRank || '',
+      cfName: `${userInfo.firstName || ''} ${userInfo.lastName || ''}`.trim(),
+    };
+
     return {
       curRating,
       maxRating,
@@ -60,9 +72,10 @@ export const fetchCfData = async (handle) => {
       submissionStats,
       problemSummary,
       updatedAt: new Date(),
+      ...profile,
     };
   } catch (err) {
-    console.error("CF API ERROR:", err.message);
-    throw new Error("Failed to fetch Codeforces data");
+    console.error('CF API ERROR:', err.message);
+    throw new Error('Failed to fetch Codeforces data');
   }
 };

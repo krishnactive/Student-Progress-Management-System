@@ -6,13 +6,14 @@ import cors from 'cors';
 import studentRoutes from './routes/studentRoutes.js';
 import connectDB from './config/db.js';
 import { startCFDataSyncJob } from './cron/fetchCFData.js';
-
+import {fetchCfData} from './utils/cfService.js'
 
 dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
 startCFDataSyncJob();
+// fetchCfData();
 connectDB();
 
 app.use('/api/students', studentRoutes);

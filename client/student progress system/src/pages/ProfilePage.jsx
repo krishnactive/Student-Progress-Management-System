@@ -48,15 +48,38 @@ const ProfilePage = () => {
   if (loading) return <div className="p-6 text-center">Loading profile...</div>;
   if (!student) return <div className="p-6 text-center text-red-500">Profile not found.</div>;
 
- const { fullName, email, phoneNumber, cfHandle, cfStats, curRating, maxRating, updatedAt } = student;
+const {
+  fullName,
+  email,
+  phoneNumber,
+  cfHandle,
+  cfStats,
+  curRating,
+  maxRating,
+  updatedAt,
+  avatar,
+  rank,
+  maxRank,
+  cfName,
+} = student;
 const { contestHistory, submissionStats } = cfStats || {};
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
+      <p>{rank}adcdscadscasd</p>
       {/* Profile Header */}
       <div className="bg-white dark:bg-gray-900 shadow rounded-lg p-6 flex flex-col sm:flex-row sm:items-center gap-6">
-        <div className="w-20 h-20 flex items-center justify-center bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-100 rounded-full text-3xl font-bold uppercase">
-          {fullName?.charAt(0)}
-        </div>
+       {avatar ? (
+  <img
+    src={avatar}
+    alt="avatar"
+    className="w-20 h-20 rounded-full object-cover border border-gray-300 dark:border-gray-700"
+  />
+) : (
+  <div className="w-20 h-20 flex items-center justify-center bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-100 rounded-full text-3xl font-bold uppercase">
+    {fullName?.charAt(0)}
+  </div>
+)}
+
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">{fullName}</h1>
           <p className="text-gray-600 dark:text-gray-300">📧 {email}</p>
@@ -72,6 +95,20 @@ const { contestHistory, submissionStats } = cfStats || {};
               {cfHandle}
             </a>
           </p>
+          {cfName && (
+  <p className="text-gray-600 dark:text-gray-300">🧾 Name: {cfName}</p>
+)}
+{rank && (
+  <p className="text-gray-600 dark:text-gray-300">
+    🏅 Rank: <span className="capitalize">{rank}</span>
+  </p>
+)}
+{maxRank && (
+  <p className="text-gray-600 dark:text-gray-300">
+    🔥 Max Rank: <span className="capitalize">{maxRank}</span>
+  </p>
+)}
+
 
           {cfStats && (
             <div className="mt-2 flex items-center gap-3 flex-wrap">

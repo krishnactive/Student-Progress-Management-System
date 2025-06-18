@@ -22,10 +22,11 @@ const StudentForm = ({ onClose, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.fullName || !formData.email || !formData.cfHandle) {
+    if (!formData.fullName || !formData.email || !formData.phoneNumber || !formData.cfHandle) {
       toast.error('Please fill all required fields');
       return;
     }
+    
 
     try {
       setLoading(true);
@@ -69,6 +70,7 @@ const StudentForm = ({ onClose, onSuccess }) => {
             value={formData.phoneNumber}
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded dark:bg-gray-800"
+            required
           />
           <input
             type="text"

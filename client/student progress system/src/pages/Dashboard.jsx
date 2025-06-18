@@ -2,15 +2,19 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import StudentTable from '../components/StudentTable';
 import StudentForm from '../components/StudentForm';
-import {FiPlus} from 'react-icons/fi';
+import { FiPlus } from 'react-icons/fi';
+
 const Dashboard = () => {
   const [students, setStudents] = useState([]);
   const [showForm, setShowForm] = useState(false);
 
   const fetchStudents = async () => {
-    const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/students`);
-    // console.log('Fetched students:', res.data);
-    setStudents(res.data);
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/students`);
+      setStudents(res.data);
+    } catch (err) {
+      console.error('Failed to fetch students');
+    }
   };
 
   useEffect(() => {
@@ -30,7 +34,7 @@ const Dashboard = () => {
         </button>
       </div>
 
-      <StudentTable students={students} />
+      <StudentTable students={students} fetchStudents={fetchStudents} />
 
       {showForm && (
         <StudentForm
@@ -41,6 +45,7 @@ const Dashboard = () => {
           }}
         />
       )}
+      
     </div>
   );
 };

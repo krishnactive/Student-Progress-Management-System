@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { saveAs } from 'file-saver';
 import { FiEye, FiEdit, FiTrash2, FiDownload } from 'react-icons/fi';
+import axios from 'axios';
+import StudentForm from './StudentForm'
+import EditStudent from '../pages/EditStudent';
 
 const getRatingColor = (rating) => {
   if (!rating) return 'bg-gray-400';
@@ -16,36 +18,21 @@ const getRatingColor = (rating) => {
   return 'bg-gray-500';
 };
 
-const StudentTable = () => {
-  const [students, setStudents] = useState([]);
+const StudentTable = ({ students, fetchStudents }) => {
+  const [editId, setEditId] = useState(null);
+
+  const [editDetails, setEditDetails] = useState(false);
   const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const studentsPerPage = 10;
   const navigate = useNavigate();
-
-  const fetchStudents = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/students`);
-      setStudents(res.data);
-    } catch (err) {
-      toast.error('Failed to fetch students');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchStudents();
-  }, []);
 
   const deleteStudent = async (id) => {
     if (!window.confirm('Are you sure you want to delete this student?')) return;
     try {
       await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/students/${id}`);
       toast.success('Student deleted');
-      await fetchStudents();
+      fetchStudents(); // Refresh list
     } catch (err) {
       toast.error('Delete failed');
     }
@@ -72,7 +59,6 @@ const StudentTable = () => {
 
   return (
     <div className="px-4 py-6 max-w-7xl mx-auto">
-      {/* //search */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
         <input
           type="text"
@@ -81,7 +67,6 @@ const StudentTable = () => {
           onChange={(e) => setSearch(e.target.value)}
           className="border rounded px-4 py-2 w-full sm:max-w-md dark:bg-gray-800 dark:text-white"
         />
-        {/* exporting as csv */}
         <button
           onClick={exportCSV}
           className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2 w-full sm:w-auto justify-center"
@@ -128,12 +113,14 @@ const StudentTable = () => {
                       <FiEye />
                     </button>
                     <button
-                      onClick={() => navigate(`/students/edit/${s._id}`)}
+                    //  onClick={() => navigate(`students/edit/${s._id}`)}
+                     onClick={() => setEditId(s._id)}
                       className="text-yellow-600 hover:text-yellow-800"
                       title="Edit"
                     >
                       <FiEdit />
                     </button>
+
                     <button
                       onClick={() => deleteStudent(s._id)}
                       className="text-red-600 hover:text-red-800"
@@ -149,20 +136,28 @@ const StudentTable = () => {
         </table>
       </div>
 
-      {/* Pagination for better performance */}
       <div className="flex justify-center flex-wrap mt-6 gap-2">
         {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
           <button
             key={p}
             onClick={() => setCurrentPage(p)}
-            className={`px-3 py-1 rounded border dark:border-gray-600 ${
-              p === currentPage ? 'bg-blue-600 text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'
-            }`}
+            className={`px-3 py-1 rounded border dark:border-gray-600 ${p === currentPage ? 'bg-blue-600 text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
           >
             {p}
           </button>
         ))}
       </div>
+      {editId && (
+        <EditStudent
+          studentId={editId}
+          onClose={() => setEditId(null)}
+          onSuccess={() => {
+            fetchStudents();
+            setEditId(null);
+          }}
+        />
+      )}
     </div>
   );
 };

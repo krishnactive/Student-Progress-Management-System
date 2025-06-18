@@ -3,6 +3,7 @@ import CalendarHeatmap from 'react-calendar-heatmap';
 import { Bar } from 'react-chartjs-2';
 import 'react-calendar-heatmap/dist/styles.css';
 import dayjs from 'dayjs';
+import HeatmapCalendar from './HeatmapCalendar'
 
 const ProblemSummary = ({ summary, submissions }) => {
   const [days, setDays] = useState('30');
@@ -82,6 +83,8 @@ const ProblemSummary = ({ summary, submissions }) => {
         }
         showWeekdayLabels
       />
+      {/* <HeatmapCalendar data={heatmapData} /> */}
+
     </div>
   );
 };
